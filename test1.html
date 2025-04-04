@@ -345,19 +345,14 @@
 
         const rawExamData = {
             questions: [
-                { question: "Which valve controls the flow of digestive juices from the hepatopancreatic duct into the duodenum?", options: ["Pyloric sphincter", "Ileocecal valve", "Sphincter of Oddi", "Lower esophageal sphincter"], correctAnswer: 2 },
-                { question: "What is the primary function of microvilli on the surface of intestinal epithelial cells?", options: ["Secretion of enzymes", "Absorption of nutrients", "Protection against pathogens", "Facilitating peristalsis"], correctAnswer: 1 },
-                { question: "Which membrane encloses the lungs?", options: ["Pericardium", "Peritoneum", "Pleural membrane", "Meninges"], correctAnswer: 2 },
-                { question: "Which organ is referred to as the \"graveyard\" of red blood cells?", options: ["Liver", "Spleen", "Kidney", "Bone marrow"], correctAnswer: 1 },
-                { question: "The Bundle of His is a component of which organ?", options: ["Brain", "Heart", "Kidney", "Liver"], correctAnswer: 1 },
-                { question: "What is the basic functional unit of the human kidney?", options: ["Neuron", "Nephron", "Alveolus", "Lobule"], correctAnswer: 1 },
-                { question: "Which type of joint is immovable?", options: ["Synovial joint", "Cartilaginous joint", "Fibrous joint", "Hinge joint"], correctAnswer: 2 },
-                { question: "Which part of the human sperm contains mitochondria?", options: ["Head", "Middle piece", "Tail", "Acrosome"], correctAnswer: 1 },
-                { question: "Which type of cartilage is found at the ends of long bones?", options: ["Elastic cartilage", "Fibrocartilage", "Hyaline cartilage", "Calcified cartilage"], correctAnswer: 2 },
-                { question: "Which part of the brain regulates body temperature and hunger?", options: ["Thalamus", "Hypothalamus", "Cerebellum", "Medulla oblongata"], correctAnswer: 1 }
+                { question: "आलम जी की पूजा किस रूप में की जाती है, और उनका संबंध किस वंश की किस शाखा से था?", options: ["कुलदेवता, जाखड़ समाज", "अश्वरक्षक देवता, जैतमालोत शाखा (राठौड़ वंश)", "गौ-रक्षक, चौहान वंश", "युद्ध-देवता, मेड़तिया शाखा (राठौड़ वंश)"], correctAnswer: 1 },
+                { question: "बिग्गा जी के संदर्भ में निम्नलिखित में से कौन-सा कथन सत्य नहीं है?", options: ["उनका मंदिर रीड़ी (बीकानेर) में स्थित है।", "वे महन जी और सुल्तानी के पुत्र थे।", "वे अश्वपालक देवता के रूप में पूजे जाते हैं।", "वे गायों की रक्षा करते हुए वीरगति को प्राप्त हुए।"], correctAnswer: 2 },
+                { question: "खेतला जी के मेले से संबंधित कौन-सा विकल्प सही नहीं है?", options: ["यह चैत्र शुक्ल एकम् को आयोजित होता है।", "यह मेला पाली जिले में आयोजित होता है।", "यहाँ आने वाले श्रद्धालु ज्यादातर व्यापार से जुड़े होते हैं।", "यहाँ हकलाने वाले बच्चों का इलाज किया जाता है।"], correctAnswer: 2 },
+                { question: "निम्नलिखित में से कौन-सा विकल्प गलत मेल प्रस्तुत करता है?", options: ["आलम जी – धोरीमन्ना (बाड़मेर)", "खेतला जी – सोनाणा (पाली)", "बिग्गा जी – जैतमालोत शाखा", "खेतला जी – हकलाने वाले बच्चों का इलाज"], correctAnswer: 2 },
+                { question: "राजस्थान के लोकदेवताओं के संबंध में निम्नलिखित में से कौन-सा कथन सही है?", options: ["आलम जी को गौ-रक्षक देवता के रूप में पूजा जाता है।", "बिग्गा जी का मंदिर बाड़मेर जिले में स्थित है।", "खेतला जी के मंदिर में अश्वपूजन किया जाता है।", "बिग्गा जी, जाखड़ समाज के कुलदेवता माने जाते हैं।"], correctAnswer: 3 }
             ],
             currentQuestion: 0,
-            answers: new Array(10).fill(null),
+            answers: new Array(5).fill(null),
             timeLeft: 3600,
             studentName: "",
             studentRollNo: "",
@@ -387,8 +382,8 @@
             }
 
             // Validate against student data
-            const isValidStudent = studentData.students.some(student => 
-                student.name.toLowerCase() === name.toLowerCase() && 
+            const isValidStudent = studentData.students.some(student =>
+                student.name.toLowerCase() === name.toLowerCase() &&
                 student.rollNo.toLowerCase() === rollNo.toLowerCase()
             );
 
@@ -487,7 +482,7 @@
             let data = decryptData(examData, encryptionKey);
             const nav = document.getElementById("questionNav");
             nav.innerHTML = data.questions.map((_, index) => `
-                <div class="question-number ${index === data.currentQuestion ? 'current' : ''} 
+                <div class="question-number ${index === data.currentQuestion ? 'current' : ''}
                             ${data.answers[index] !== null ? 'answered' : ''}"
                      onclick="navigateToQuestion(${index})">${index + 1}</div>
             `).join('');
@@ -655,9 +650,9 @@
         (function() {
             const originalToString = Function.prototype.toString;
             Function.prototype.toString = function() {
-                if (this === startExam || this === displayQuestion || this === selectOption || this === previousQuestion || 
-                    this === nextQuestion || this === startTimer || this === updateQuestionNav || this === navigateToQuestion || 
-                    this === calculateResults || this === getIncorrectQuestions || this === submitExam || this === formatTime || 
+                if (this === startExam || this === displayQuestion || this === selectOption || this === previousQuestion ||
+                    this === nextQuestion || this === startTimer || this === updateQuestionNav || this === navigateToQuestion ||
+                    this === calculateResults || this === getIncorrectQuestions || this === submitExam || this === formatTime ||
                     this === downloadResult || this === shareResultToTelegram) {
                     document.body.innerHTML = '<h1>Code tampering detected!</h1>';
                     throw new Error('Tampering detected');
