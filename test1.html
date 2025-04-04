@@ -321,31 +321,10 @@
         </div>
     </div>
 
-    <script>
-        // Simulated "file" with student data (replace this with your actual list)
-        const studentData = {
-            students: [
-                { name: "John Doe", rollNo: "ABC123" },
-                { name: "Jane Smith", rollNo: "XYZ789" },
-                { name: "Amit Kumar", rollNo: "PMIE001" },
-                { name: "Priya Sharma", rollNo: "PMIE002" },
-                // Add more students here manually
-            ]
-        };
+    <!-- Load external student data file -->
+    <script src="pmiedupage.js"></script>
 
-        // Anti-debugging: Detect if DevTools is open
-        (function() {
-            const threshold = 100;
-            const checkDevTools = () => {
-                const widthDiff = window.outerWidth - window.innerWidth > threshold;
-                const heightDiff = window.outerHeight - window.innerHeight > threshold;
-                if (widthDiff || heightDiff) {
-                    document.body.innerHTML = '<h1>Unauthorized access detected!</h1>';
-                    throw new Error('Debugging tools detected');
-                }
-            };
-            setInterval(checkDevTools, 1000);
-        })();
+    <script>
 
         // Disable right-click and common shortcuts
         document.addEventListener('contextmenu', e => e.preventDefault());
@@ -395,6 +374,12 @@
         const startExam = secureFunction(() => {
             const name = document.getElementById("name").value.trim();
             const rollNo = document.getElementById("rollNo").value.trim();
+
+            // Check if studentData is loaded from pmiedupage.js
+            if (typeof studentData === 'undefined' || !studentData.students) {
+                alert("Student data not loaded. Please ensure pmiedupage.js is correctly linked.");
+                return;
+            }
 
             // Validate against student data
             const isValidStudent = studentData.students.some(student => 
@@ -676,7 +661,5 @@
             };
         })();
     </script>
-</body>
-</html>
 </body>
 </html>
