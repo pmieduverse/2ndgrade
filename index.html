@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>PMI Eduverse Exam</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #f0f4f8;
+            min-height: 100vh;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+            color: white;
+            padding: 1.5rem;
+            text-align: center;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+
+        .container {
+            padding: 1rem;
+            padding-top: 5rem;
+            max-width: 100%;
+        }
+
+        .login-form {
+            background: white;
+            padding: 2rem;
+            border-radius: 1.5rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            margin: 1rem;
+            animation: slideUp 0.5s ease-out;
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(100px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .input-field {
+            width: 100%;
+            padding: 1rem;
+            margin: 0.75rem 0;
+            border: 1px solid #e5e7eb;
+            border-radius: 0.75rem;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .input-field:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+        }
+
+        .btn {
+            width: 100%;
+            padding: 1rem;
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+            color: white;
+            border: none;
+            border-radius: 0.75rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn:hover {
+            transform: scale(1.02);
+            box-shadow: 0 5px 15px rgba(59, 130, 246, 0.4);
+        }
+
+        .share-btn {
+            background: linear-gradient(135deg, #00c4cc, #0088cc);
+            margin-top: 1rem;
+        }
+
+        .timer {
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+            color: white;
+            padding: 0.75rem;
+            border-radius: 0.75rem;
+            text-align: center;
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin: 1rem;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+            100% { transform: scale(1); }
+        }
+
+        .question-container {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 1.5rem;
+            margin: 1rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .option {
+            padding: 1rem;
+            margin: 0.5rem 0;
+            border: 1px solid #e5e7eb;
+            border-radius: 0.75rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .option:hover {
+            border-color: #3b82f6;
+            background: #f8fafc;
+        }
+
+        .option.selected {
+            background: #3b82f6;
+            color: white;
+            border-color: #2563eb;
+            transform: scale(1.02);
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 0.75rem;
+            margin-top: 1.5rem;
+        }
+
+        .nav-btn {
+            flex: 1;
+            padding: 1rem;
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+            color: white;
+            border: none;
+            border-radius: 0.75rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .nav-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .nav-btn:hover:not(:disabled) {
+            transform: scale(1.02);
+            box-shadow: 0 5px 15px rgba(59, 130, 246, 0.4);
+        }
+
+        .question-nav {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin: 1rem;
+            justify-content: center;
+        }
+
+        .question-number {
+            width: 2.5rem;
+            height: 2.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background: #e5e7eb;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .question-number.answered {
+            background: #3b82f6;
+            color: white;
+        }
+
+        .question-number.current {
+            border: 2px solid #2563eb;
+            transform: scale(1.1);
+            box-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
+        }
+
+        .result-card {
+            background: white;
+            padding: 2rem;
+            border-radius: 1.5rem;
+            margin: 1rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            animation: slideUp 0.5s ease-out;
+        }
+
+        .result-details {
+            display: grid;
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+
+        .result-item {
+            background: linear-gradient(135deg, #f8fafc, #e5e7eb);
+            padding: 1.5rem;
+            border-radius: 1rem;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .result-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .result-item-value {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: #3b82f6;
+        }
+
+        .result-item-label {
+            color: #6b7280;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+        }
+
+        .incorrect-questions {
+            margin-top: 2rem;
+        }
+
+        .incorrect-question {
+            background: #fef2f2;
+            padding: 1rem;
+            border-radius: 0.75rem;
+            margin: 0.75rem 0;
+            border-left: 4px solid #ef4444;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .correct-answer {
+            color: #10b981;
+            font-weight: 600;
+            margin-top: 0.5rem;
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1 class="text-2xl font-bold">PMI Eduverse Exam</h1>
+    </div>
+
+    <div class="container">
+        <div id="loginScreen">
+            <div class="login-form">
+                <h2 class="text-2xl font-bold text-center mb-6">Student Login</h2>
+                <input type="text" id="name" placeholder="Full Name" class="input-field">
+                <input type="text" id="rollNo" placeholder="Roll Number" class="input-field">
+                <button onclick="startExam()" class="btn mt-4">Start Exam</button>
+            </div>
+        </div>
+
+        <div id="examScreen" class="hidden">
+            <div class="timer" id="timer">Time: 60:00</div>
+            <div class="question-nav" id="questionNav"></div>
+            <div id="questionContainer" class="question-container"></div>
+        </div>
+
+        <div id="resultScreen" class="hidden">
+            <div class="result-card">
+                <h2 class="text-2xl font-bold mb-6 text-center">Your Results</h2>
+                <div class="text-center mb-4 text-gray-600">
+                    <p id="resultStudentInfo"></p>
+                </div>
+                <div class="result-details">
+                    <div class="result-item">
+                        <div class="result-item-value" id="scoreValue"></div>
+                        <div class="result-item-label">Score</div>
+                    </div>
+                    <div class="result-item">
+                        <div class="result-item-value" id="accuracyValue"></div>
+                        <div class="result-item-label">Accuracy</div>
+                    </div>
+                    <div class="result-item">
+                        <div class="result-item-value" id="timeValue"></div>
+                        <div class="result-item-label">Time Taken</div>
+                    </div>
+                </div>
+                <div class="incorrect-questions" id="incorrectQuestions"></div>
+                <button onclick="downloadResult()" class="btn mt-6">Download PDF</button>
+                <button onclick="shareResultToTelegram()" class="btn share-btn">Share to Telegram</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Load external student data file -->
+    <script src="pmiedupage.js"></script>
+
+    <script>
+        // Anti-debugging: Detect if DevTools is open
+        (function() {
+            const threshold = 100;
+            const checkDevTools = () => {
+                const widthDiff = window.outerWidth - window.innerWidth > threshold;
+                const heightDiff = window.outerHeight - window.innerHeight > threshold;
+                if (widthDiff || heightDiff) {
+                    document.body.innerHTML = '<h1>Unauthorized access detected!</h1>';
+                    throw new Error('Debugging tools detected');
+                }
+            };
+            setInterval(checkDevTools, 1000);
+        })();
+
+        // Disable right-click and common shortcuts
+        document.addEventListener('contextmenu', e => e.preventDefault());
+        document.addEventListener('keydown', e => {
+            if (e.ctrlKey && (e.key === 'c' || e.key === 'u' || e.key === 'i') || e.key === 'F12') {
+                e.preventDefault();
+            }
+        });
+
+        // Obfuscated exam data with basic encryption
+        const encryptData = (data, key) => {
+            return btoa(JSON.stringify(data).split('').map(c => String.fromCharCode(c.charCodeAt(0) ^ key)).join(''));
+        };
+        const decryptData = (encrypted, key) => {
+            return JSON.parse(atob(encrypted).split('').map(c => String.fromCharCode(c.charCodeAt(0) ^ key)).join(''));
+        };
+        const encryptionKey = 42;
+
+        const rawExamData = {
+            questions: [
+                { question: "Which valve controls the flow of digestive juices from the hepatopancreatic duct into the duodenum?", options: ["Pyloric sphincter", "Ileocecal valve", "Sphincter of Oddi", "Lower esophageal sphincter"], correctAnswer: 2 },
+                { question: "What is the primary function of microvilli on the surface of intestinal epithelial cells?", options: ["Secretion of enzymes", "Absorption of nutrients", "Protection against pathogens", "Facilitating peristalsis"], correctAnswer: 1 },
+                { question: "Which membrane encloses the lungs?", options: ["Pericardium", "Peritoneum", "Pleural membrane", "Meninges"], correctAnswer: 2 },
+                { question: "Which organ is referred to as the \"graveyard\" of red blood cells?", options: ["Liver", "Spleen", "Kidney", "Bone marrow"], correctAnswer: 1 },
+                { question: "The Bundle of His is a component of which organ?", options: ["Brain", "Heart", "Kidney", "Liver"], correctAnswer: 1 },
+                { question: "What is the basic functional unit of the human kidney?", options: ["Neuron", "Nephron", "Alveolus", "Lobule"], correctAnswer: 1 },
+                { question: "Which type of joint is immovable?", options: ["Synovial joint", "Cartilaginous joint", "Fibrous joint", "Hinge joint"], correctAnswer: 2 },
+                { question: "Which part of the human sperm contains mitochondria?", options: ["Head", "Middle piece", "Tail", "Acrosome"], correctAnswer: 1 },
+                { question: "Which type of cartilage is found at the ends of long bones?", options: ["Elastic cartilage", "Fibrocartilage", "Hyaline cartilage", "Calcified cartilage"], correctAnswer: 2 },
+                { question: "Which part of the brain regulates body temperature and hunger?", options: ["Thalamus", "Hypothalamus", "Cerebellum", "Medulla oblongata"], correctAnswer: 1 }
+            ],
+            currentQuestion: 0,
+            answers: new Array(10).fill(null),
+            timeLeft: 3600,
+            studentName: "",
+            studentRollNo: "",
+            startTime: null
+        };
+
+        let examData = encryptData(rawExamData, encryptionKey);
+
+        // Secure function wrapper
+        const secureFunction = (fn) => {
+            return (...args) => {
+                if (new Error().stack.split('\n').length > 10) {
+                    throw new Error('Unauthorized function call detected');
+                }
+                return fn(...args);
+            };
+        };
+
+        const startExam = secureFunction(() => {
+            const name = document.getElementById("name").value.trim();
+            const rollNo = document.getElementById("rollNo").value.trim();
+
+            // Check if studentData is loaded from pmiedupage.js
+            if (typeof studentData === 'undefined' || !studentData.students) {
+                alert("Student data not loaded. Please ensure pmiedupage.js is correctly linked.");
+                return;
+            }
+
+            // Validate against student data
+            const isValidStudent = studentData.students.some(student => 
+                student.name.toLowerCase() === name.toLowerCase() && 
+                student.rollNo.toLowerCase() === rollNo.toLowerCase()
+            );
+
+            if (!name || !rollNo) {
+                alert("Please enter both name and roll number");
+                return;
+            }
+            if (!isValidStudent) {
+                alert("Invalid name or roll number. Only registered students can take the exam.");
+                return;
+            }
+
+            let data = decryptData(examData, encryptionKey);
+            data.studentName = name;
+            data.studentRollNo = rollNo;
+            data.startTime = new Date();
+            examData = encryptData(data, encryptionKey);
+
+            document.getElementById("loginScreen").classList.add("hidden");
+            document.getElementById("examScreen").classList.remove("hidden");
+            displayQuestion();
+            startTimer();
+            updateQuestionNav();
+        });
+
+        const displayQuestion = secureFunction(() => {
+            let data = decryptData(examData, encryptionKey);
+            const question = data.questions[data.currentQuestion];
+            const container = document.getElementById("questionContainer");
+            container.innerHTML = `
+                <h3 class="text-lg font-semibold mb-4">Q${data.currentQuestion + 1}: ${question.question}</h3>
+                <div class="options">
+                    ${question.options.map((option, index) => `
+                        <div class="option ${data.answers[data.currentQuestion] === index ? 'selected' : ''}"
+                             onclick="selectOption(${index})">${option}</div>
+                    `).join('')}
+                </div>
+                <div class="nav-buttons">
+                    <button onclick="previousQuestion()" class="nav-btn" ${data.currentQuestion === 0 ? 'disabled' : ''}>Previous</button>
+                    <button onclick="nextQuestion()" class="nav-btn">${data.currentQuestion === data.questions.length - 1 ? 'Finish' : 'Next'}</button>
+                </div>
+            `;
+            examData = encryptData(data, encryptionKey);
+        });
+
+        const selectOption = secureFunction((optionIndex) => {
+            let data = decryptData(examData, encryptionKey);
+            if (optionIndex < 0 || optionIndex >= data.questions[data.currentQuestion].options.length) return;
+            data.answers[data.currentQuestion] = optionIndex;
+            examData = encryptData(data, encryptionKey);
+            displayQuestion();
+            updateQuestionNav();
+        });
+
+        const previousQuestion = secureFunction(() => {
+            let data = decryptData(examData, encryptionKey);
+            if (data.currentQuestion > 0) {
+                data.currentQuestion--;
+                examData = encryptData(data, encryptionKey);
+                displayQuestion();
+                updateQuestionNav();
+            }
+        });
+
+        const nextQuestion = secureFunction(() => {
+            let data = decryptData(examData, encryptionKey);
+            if (data.currentQuestion < data.questions.length - 1) {
+                data.currentQuestion++;
+                examData = encryptData(data, encryptionKey);
+                displayQuestion();
+                updateQuestionNav();
+            } else {
+                submitExam();
+            }
+        });
+
+        const startTimer = secureFunction(() => {
+            const timerElement = document.getElementById("timer");
+            const timer = setInterval(() => {
+                let data = decryptData(examData, encryptionKey);
+                data.timeLeft--;
+                const minutes = Math.floor(data.timeLeft / 60);
+                const seconds = data.timeLeft % 60;
+                timerElement.textContent = `Time: ${minutes}:${seconds.toString().padStart(2, '0')}`;
+                if (data.timeLeft <= 0) {
+                    clearInterval(timer);
+                    examData = encryptData(data, encryptionKey);
+                    submitExam();
+                } else {
+                    examData = encryptData(data, encryptionKey);
+                }
+            }, 1000);
+        });
+
+        const updateQuestionNav = secureFunction(() => {
+            let data = decryptData(examData, encryptionKey);
+            const nav = document.getElementById("questionNav");
+            nav.innerHTML = data.questions.map((_, index) => `
+                <div class="question-number ${index === data.currentQuestion ? 'current' : ''} 
+                            ${data.answers[index] !== null ? 'answered' : ''}"
+                     onclick="navigateToQuestion(${index})">${index + 1}</div>
+            `).join('');
+            examData = encryptData(data, encryptionKey);
+        });
+
+        const navigateToQuestion = secureFunction((index) => {
+            let data = decryptData(examData, encryptionKey);
+            if (index >= 0 && index < data.questions.length) {
+                data.currentQuestion = index;
+                examData = encryptData(data, encryptionKey);
+                displayQuestion();
+                updateQuestionNav();
+            }
+        });
+
+        const calculateResults = secureFunction(() => {
+            let data = decryptData(examData, encryptionKey);
+            let score = 0;
+            let attempted = 0;
+            data.answers.forEach((answer, index) => {
+                if (answer !== null) {
+                    attempted++;
+                    if (answer === data.questions[index].correctAnswer) score++;
+                }
+            });
+            const timeTaken = Math.floor((new Date() - data.startTime) / 1000);
+            const accuracy = attempted ? ((score / attempted) * 100).toFixed(1) : 0;
+            return { score, accuracy, timeTaken };
+        });
+
+        const getIncorrectQuestions = secureFunction(() => {
+            let data = decryptData(examData, encryptionKey);
+            return data.answers.map((answer, index) => {
+                const question = data.questions[index];
+                if (answer !== null && answer !== question.correctAnswer) {
+                    return {
+                        question: question.question,
+                        yourAnswer: question.options[answer],
+                        correctAnswer: question.options[question.correctAnswer]
+                    };
+                }
+                return null;
+            }).filter(q => q !== null);
+        });
+
+        const submitExam = secureFunction(() => {
+            const results = calculateResults();
+            const incorrectQuestions = getIncorrectQuestions();
+            let data = decryptData(examData, encryptionKey);
+            document.getElementById("examScreen").classList.add("hidden");
+            document.getElementById("resultScreen").classList.remove("hidden");
+            document.getElementById("resultStudentInfo").textContent = `${data.studentName} | ${data.studentRollNo}`;
+            document.getElementById("scoreValue").textContent = `${results.score}/${data.questions.length}`;
+            document.getElementById("accuracyValue").textContent = `${results.accuracy}%`;
+            document.getElementById("timeValue").textContent = formatTime(results.timeTaken);
+            document.getElementById("incorrectQuestions").innerHTML = `
+                <h3 class="text-lg font-semibold mb-4">Incorrect Answers</h3>
+                ${incorrectQuestions.map(q => `
+                    <div class="incorrect-question">
+                        <p class="font-medium">${q.question}</p>
+                        <p class="text-sm text-red-600">Your: ${q.yourAnswer}</p>
+                        <p class="correct-answer">Correct: ${q.correctAnswer}</p>
+                    </div>
+                `).join('') || '<p class="text-gray-500">All answers correct!</p>'}
+            `;
+        });
+
+        const formatTime = secureFunction((seconds) => {
+            const minutes = Math.floor(seconds / 60);
+            const remainingSeconds = seconds % 60;
+            return `${minutes}m ${remainingSeconds}s`;
+        });
+
+        const downloadResult = secureFunction(() => {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+            const results = calculateResults();
+            const incorrectQuestions = getIncorrectQuestions();
+            let data = decryptData(examData, encryptionKey);
+
+            doc.setFillColor(59, 130, 246);
+            doc.rect(0, 0, 210, 40, 'F');
+            doc.setFontSize(24);
+            doc.setTextColor(255);
+            doc.text("PMI Eduverse Results", 105, 25, { align: "center" });
+
+            doc.setFontSize(12);
+            doc.setTextColor(0);
+            doc.text(`Name: ${data.studentName}`, 20, 50);
+            doc.text(`Roll No: ${data.studentRollNo}`, 20, 60);
+            doc.text(`Date: ${new Date().toLocaleDateString()}`, 20, 70);
+
+            doc.setFillColor(240, 244, 248);
+            doc.roundedRect(20, 80, 170, 50, 5, 5, 'F');
+            doc.setFontSize(16);
+            doc.text(`Score: ${results.score}/${data.questions.length}`, 30, 95);
+            doc.text(`Accuracy: ${results.accuracy}%`, 30, 105);
+            doc.text(`Time: ${formatTime(results.timeTaken)}`, 30, 115);
+
+            let y = 140;
+            doc.setFontSize(14);
+            doc.text("Incorrect Answers", 20, y);
+            doc.setLineWidth(0.5);
+            doc.line(20, y + 2, 80, y + 2);
+            y += 10;
+
+            incorrectQuestions.forEach((q, index) => {
+                if (y > 260) {
+                    doc.addPage();
+                    y = 20;
+                }
+                doc.setFontSize(10);
+                doc.text(`${index + 1}. ${q.question}`, 20, y, { maxWidth: 170 });
+                y += doc.splitTextToSize(q.question, 170).length * 5 + 5;
+                doc.setTextColor(239, 68, 68);
+                doc.text(`Your: ${q.yourAnswer}`, 25, y);
+                doc.setTextColor(16, 185, 129);
+                doc.text(`Correct: ${q.correctAnswer}`, 25, y + 7);
+                doc.setTextColor(0);
+                y += 20;
+            });
+
+            doc.setFontSize(8);
+            doc.setTextColor(100);
+            doc.text("Generated by PMI Eduverse", 105, 290, { align: "center" });
+
+            doc.save(`Result_${data.studentRollNo}.pdf`);
+        });
+
+        const shareResultToTelegram = secureFunction(() => {
+            const resultCard = document.querySelector('.result-card');
+            html2canvas(resultCard, { scale: 2 }).then(canvas => {
+                const imgData = canvas.toDataURL('image/png');
+                const link = document.createElement('a');
+                link.href = imgData;
+                link.download = `Result_${decryptData(examData, encryptionKey).studentRollNo}.png`;
+
+                fetch(imgData)
+                    .then(res => res.blob())
+                    .then(blob => {
+                        const file = new File([blob], `Result_${decryptData(examData, encryptionKey).studentRollNo}.png`, { type: 'image/png' });
+                        const filesArray = [file];
+
+                        if (navigator.canShare && navigator.canShare({ files: filesArray })) {
+                            navigator.share({
+                                files: filesArray,
+                                title: 'Exam Result',
+                                text: `Exam Result for ${decryptData(examData, encryptionKey).studentName} (Roll No: ${decryptData(examData, encryptionKey).studentRollNo})`
+                            })
+                            .then(() => {
+                                window.open('https://t.me/+W_sQaCHcIzgwMDY1', '_blank');
+                            })
+                            .catch(err => console.error('Sharing failed:', err));
+                        } else {
+                            link.click();
+                            alert('Please manually share the downloaded image to Telegram.');
+                            window.open('https://t.me/+W_sQaCHcIzgwMDY1', '_blank');
+                        }
+                    });
+            });
+        });
+
+        // Self-destruct if tampered
+        (function() {
+            const originalToString = Function.prototype.toString;
+            Function.prototype.toString = function() {
+                if (this === startExam || this === displayQuestion || this === selectOption || this === previousQuestion || 
+                    this === nextQuestion || this === startTimer || this === updateQuestionNav || this === navigateToQuestion || 
+                    this === calculateResults || this === getIncorrectQuestions || this === submitExam || this === formatTime || 
+                    this === downloadResult || this === shareResultToTelegram) {
+                    document.body.innerHTML = '<h1>Code tampering detected!</h1>';
+                    throw new Error('Tampering detected');
+                }
+                return originalToString.call(this);
+            };
+        })();
+    </script>
+</body>
+</html>
