@@ -8,6 +8,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
+        /* Keeping all your original styles unchanged */
         * {
             margin: 0;
             padding: 0;
@@ -22,6 +23,7 @@
             -webkit-font-smoothing: antialiased;
         }
 
+        /* ... rest of your original styles ... */
         .header {
             background: linear-gradient(90deg, #3b82f6, #7c3aed);
             color: white;
@@ -75,7 +77,7 @@
             box-shadow: 0 0 15px rgba(59, 130, 246, 0.4);
         }
 
-        .pmi-logo {
+        .pmieduverse-logo {
             width: 100px;
             height: auto;
             display: block;
@@ -330,11 +332,60 @@
                 justify-content: space-between;
             }
         }
+
+        /* Dark Mode */
+        body.dark-mode {
+            background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
+            color: #f3f4f6;
+        }
+
+        body.dark-mode .header {
+            background: linear-gradient(90deg, #4b5563, #374151);
+        }
+
+        body.dark-mode .login-form,
+        body.dark-mode .question-container,
+        body.dark-mode .result-card,
+        body.dark-mode .timer,
+        body.dark-mode .incorrect-questions {
+            background: #1f2937;
+            color: #f3f4f6;
+        }
+
+        body.dark-mode .input-field {
+            border-color: #4b5563;
+        }
+
+        body.dark-mode .btn,
+        body.dark-mode .nav-btn {
+            background: linear-gradient(90deg, #4b5563, #374151);
+        }
+
+        body.dark-mode .option {
+            border-color: #4b5563;
+        }
+
+        body.dark-mode .option:hover {
+            background: #374151;
+        }
+
+        body.dark-mode .option.selected {
+            background: #4b5563;
+        }
+
+        body.dark-mode .progress {
+            background: linear-gradient(90deg, #4b5563, #374151);
+        }
     </style>
 </head>
 <body>
     <div class="header">
         <h1 class="text-2xl font-bold">PMI Eduverse Examination</h1>
+        <button id="darkModeToggle" class="absolute right-4 top-4 text-white">
+            <svg xmlns="https://i.ibb.co/Lh8FKn63/SJHY6436.png" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v2M6 21h3M18 21h3M4.22 4.22l1.42 1.42M1.39 10.39l1.42 1.42M1.39 16.39l1.42 1.42M4.22 21.78l1.42-1.42M10.39 1.39l1.42 1.42M16.39 1.39l1.42 1.42M21.78 4.22l-1.42 1.42M21.78 10.39l-1.42 1.42M21.78 16.39l-1.42 1.42" />
+            </svg>
+        </button>
     </div>
 
     <div class="container">
@@ -359,56 +410,96 @@
         </div>
 
         <div id="resultScreen" class="hidden">
-            <div class="result-card">
+            <div class="result-card" id="resultCard">
                 <h2 class="text-xl font-bold mb-4">Examination Results</h2>
                 <div class="student-info" id="resultStudentInfo"></div>
-                <div class="result-details">
-                    <div class="result-item">
-                        <div class="result-item-value" id="scoreValue"></div>
-                        <div class="result-item-label">Total Score</div>
-                    </div>
-                    <div class="result-item">
-                        <div class="result-item-value" id="accuracyValue"></div>
-                        <div class="result-item-label">Accuracy</div>
-                    </div>
-                    <div class="result-item">
-                        <div class="result-item-value" id="timeValue"></div>
-                        <div class="result-item-label">Time Taken</div>
-                    </div>
-                </div>
+                <div class="result-details" id="resultDetails"></div>
                 <button onclick="downloadResult()" class="btn mt-4">Download Result PDF</button>
             </div>
         </div>
     </div>
 
     <script>
-        let examData = {
+        const examData = {
             questions: [
-                { question: "पाबूजी के जीवन से संबंधित निम्नलिखित में से कौन-सा कथन सही नहीं है?", options: ["पाबूजी को लक्ष्मण का अवतार माना जाता है।", "उनकी घोड़ी का नाम लीलो था।", "वे अपने विवाह के दौरान गायों की रक्षा के लिए लौट आए थे।", "उनका जन्म कोलूमण्ड (फलौदी) में हुआ था।"], correctAnswer: 2 },
-                { question: "रामदेव जी तंवर के संदर्भ में निम्न में से कौन-सा तथ्य उनके गुरु से संबंधित है?", options: ["बालीनाथ जी", "रिखिया", "अजमाल जी", "दलेलसिंह सोदा"], correctAnswer: 0 },
-                { question: "गोगाजी चौहान को 'जाहिरपीर' की उपाधि किसने दी थी?", options: ["उनके मौसेरे भाइयों अरजन-सरजन ने", "महमूद गजनवी ने", "उनके पिता जेवरसिंह ने", "बीठू मेहाजी ने"], correctAnswer: 1 },
-                { question: "निम्नलिखित में से कौन-सा लोकदेवता सर्परक्षक देवता के रूप में पूजा जाता है और खेजड़ी के पेड़ के नीचे उनके मंदिर बनाए जाते हैं?", options: ["पाबूजी", "हड़बूजी", "गोगाजी", "मेहाजी मांगलिया"], correctAnswer: 2 },
-                { question: "हड़बूजी सांखला के बारे में निम्न में से कौन-सा कथन सही है?", options: ["वे रामदेव जी के सौतेले भाई थे।", "उनका वाहन ऊँट था।", "उन्होंने राव जोधा को मण्डोर जीतने का आशीर्वाद दिया था।", "उनका जन्म ददरेवा (चुरु) में हुआ था।"], correctAnswer: 2 },
-                { question: "पाबूजी से संबंधित पुस्तक 'पाबू जी रा दूहा' के रचयिता कौन हैं?", options: ["आशिया मोड़जी", "लघराज", "बीठू मेहाजी", "बांकीदास"], correctAnswer: 1 },
-                { question: "रामदेव जी ने किस सम्प्रदाय की शुरुआत की, जिसमें महिलाएँ तेरहवाली नृत्य करती हैं?", options: ["कामड़िया सम्प्रदाय", "राईका सम्प्रदाय", "मेघवाल सम्प्रदाय", "भील सम्प्रदाय"], correctAnswer: 0 },
-                { question: "निम्नलिखित में से कौन-सा लोकदेवता अपने विवाह के 3 फेरे पूरे करने से पहले गायों की रक्षा के लिए लौट आया और वीरगति को प्राप्त हुआ?", options: ["तेजाजी", "पाबूजी", "गोगाजी", "मेहाजी मांगलिया"], correctAnswer: 1 },
-                { question: "तेजाजी के संदर्भ में निम्न में से कौन-सा कथन गलत है?", options: ["उनकी मृत्यु सर्पदंश से हुई थी।", "वे जाट परिवार में जन्मे थे।", "उनकी घोड़ी का नाम केसर कालमी था।", "उन्हें काला-बाला का देवता कहा जाता है।"], correctAnswer: 2 },
-                { question: "मेहाजी मांगलिया के भोपों के बारे में क्या विशेषता बताई गई है?", options: ["उनके वंश की वृद्धि नहीं होती।", "वे रावणहत्था वाद्ययंत्र बजाते हैं।", "वे केवल चैत्र अमावस्या को गीत गाते हैं।", "वे खेजड़ी के पेड़ के नीचे पूजा करते हैं।"], correctAnswer: 0 }
+                { question: "सात ग्वालो को भोजन किस लोक देवता को खुश करने के लिए करवाया जाता है?", options: ["गोगाजी", "देव बाबा", "मल्लिनाथ जी", "झुंझार जी"], correctAnswer: 1 },
+                { question: "पाबूजी का मेला कब लगता है?", options: ["भाद्रपद शुक्ल नवमी", "चैत्र अमावस्या", "आश्विन पूर्णिमा", "भाद्रपद शुक्ल पंचमी"], correctAnswer: 1 },
+                { question: "हरिराम जी का मंदिर कहाँ है और उनका मेला कब लगता है?", options: ["झोरड़ा (नागौर), भाद्रपद शुक्ल पंचमी", "सोनाना (पाली), चैत्र अमावस्या", "नांगलाझज (भरतपुर), आश्विन पूर्णिमा", "पटौदा (सीकर), भाद्रपद शुक्ल नवमी"], correctAnswer: 0 },
+                { question: "मेहाजी मांगलिया का मंदिर कहाँ है?", options: ["बापीनी (फलोदी)", "नांगलाझज (भरतपुर)", "झोरड़ा (नागौर)", "सोनाना (पाली)"], correctAnswer: 0 },
+                { question: "गुर्जर भोपे देवनारायण जी की फड़ किस वाद्य यंत्र की मदद से गाते हैं?", options: ["जन्त्र वाद्य यंत्र", "ढोलक", "सारंगी", "रावणहत्था"], correctAnswer: 0 },
+                { question: "हकलाने वाले बच्चों का इलाज सोनाना (पाली) में किस लोक देवता के मंदिर में होता है?", options: ["तेजाजी", "मल्लिनाथ जी", "खेतला जी", "गोगाजी"], correctAnswer: 2 },
+                { question: "रामदेवजी के झंडे को किस नाम से जाना जाता है?", options: ["नेजा", "तोरण", "फड़", "ओलड़ी"], correctAnswer: 0 },
+                { question: "सबसे लंबी फड़ किस लोक देवता की है?", options: ["तेजाजी", "गोगाजी", "देवनारायण जी", "पाबूजी"], correctAnswer: 2 },
+                { question: "मालासेरी में किस लोक देवता का जन्म हुआ था?", options: ["गोगाजी", "देवनारायण जी", "तेजाजी", "मल्लिनाथ जी"], correctAnswer: 1 },
+                { question: "बीकानेर के महाराज रतनसिंह ने जवाहरजी को किस किले में गिरफ्तार किया था?", options: ["मालासेरी", "जूनागढ़", "नांगलाझज (भरतपुर)", "सोनाना (पाली)"], correctAnswer: 1 },
+                { question: "किस लोक देवता के मंदिर में दूल्हा-दुल्हन और तीन भाइयों की मूर्ति की पूजा होती है?", options: ["झुंझार जी", "देवनारायण जी", "मल्लिनाथ जी", "गोगाजी"], correctAnswer: 0 },
+                { question: "केसरिया कुंवर जी किसके पुत्र थे?", options: ["तेजाजी", "गोगाजी", "देवनारायण जी", "पाबूजी"], correctAnswer: 1 },
+                { question: "हडबूजी के गुरु कौन थे?", options: ["मल्लिनाथ जी", "बालीनाथ जी", "मेहाजी मांगलिया", "तेजाजी"], correctAnswer: 1 },
+                { question: "राव जोधा को मंडोर जीतने का आशीर्वाद किस लोक देवता ने दिया था?", options: ["हडबूजी", "गोगाजी", "मल्लिनाथ जी", "पाबूजी"], correctAnswer: 0 },
+                { question: "देव डूंगरी मंदिर का निर्माण किसने करवाया था और यह किस लोक देवता का है?", options: ["राणा सांगा, देवनारायण जी", "महाराज रतनसिंह, गोगाजी", "जिंद्राव खीची, गोगाजी", "हरिराम जी, देवनारायण जी"], correctAnswer: 0 },
+                { question: "अश्व रक्षक देवता किस राठौड़ वंश की शाखा से संबंधित थे?", options: ["मालासेरी", "जेतमालोत", "पटौदा", "झोरड़ा"], correctAnswer: 1 },
+                { question: "1399 में मारवाड़ में किस लोक देवता ने हरिकीर्तन का आयोजन करवाया था?", options: ["मल्लिनाथ जी", "तेजाजी", "गोगाजी", "पाबूजी"], correctAnswer: 0 },
+                { question: "रीडी (बीकानेर) में जाखड़ समाज के कुलदेवता कौन से लोक देवता हैं?", options: ["बिग्गाजी", "मामा देव", "पाबूजी", "मेहाजी मंगलिया"], correctAnswer: 0 },
+                { question: "डूंगजी-जवाहर जी कौन से क्षेत्र के सामंत थे?", options: ["पटौदा (सीकर)", "जूनागढ़", "झोरड़ा (नागौर)", "मालासेरी"], correctAnswer: 0 },
+                { question: "वीर फत्ता जी का मेला कब लगता है?", options: ["चैत्र अमावस्या", "भाद्रपद शुक्ल नवमी", "भाद्रपद शुक्ल पंचमी", "आश्विन पूर्णिमा"], correctAnswer: 1 },
+                { question: "जिंद्राव खीची को किसने मारा था?", options: ["झरड़ा जी", "गोगाजी", "मल्लिनाथ जी", "तेजाजी"], correctAnswer: 0 },
+                { question: "मामा देव की पूजा कहाँ होती है?", options: ["गाँव के बाहर उनके तोरण की पूजा", "मंदिर के अंदर तीन भाइयों की मूर्ति के साथ", "सोनाना (पाली) में", "मालासेरी में"], correctAnswer: 0 },
+                { question: "शेरगढ़ के सामंत तल्लीनाथ जी के मंदिर की क्या विशेषता है?", options: ["मंदिर में सात ज्वालाएँ हैं", "मंदिर के आसपास पेड़-पौधों वाली भूमि जहाँ वृक्ष नहीं काटे जाते", "मंदिर में दूल्हा-दुल्हन की मूर्ति है", "मंदिर में सबसे लंबी फड़ गाई जाती है"], correctAnswer: 1 },
+                { question: "देव बाबा का मंदिर कहाँ स्थित है?", options: ["मालासेरी", "नांगलाझज (भरतपुर)", "सोनाना (पाली)", "झोरड़ा (नागौर)"], correctAnswer: 1 },
+                { question: "पाबूजी की हत्या किसने की थी?", options: ["मल्लिनाथ जी", "जिंद्राव खीची", "गोगाजी", "तेजाजी"], correctAnswer: 1 },
+                { question: "बासी डूंगरी मंदिर किस लोक देवता का है?", options: ["गोगाजी", "तेजाजी", "मल्लिनाथ जी", "पाबूजी"], correctAnswer: 1 },
+                { question: "सुरसुरा गाँव में किस लोक देवता की मृत्यु हुई थी?", options: ["तेजाजी", "गोगाजी", "मल्लिनाथ जी", "झुंझार जी"], correctAnswer: 0 },
+                { question: "खिलेरियो की ढाणी (सांचोर) में गोगाजी का कौन सा मंदिर है?", options: ["गोगाजी री ओलड़ी", "गोगाजी री डूंगरी", "गोगाजी री फड़", "गोगाजी री तोरण"], correctAnswer: 0 },
+                { question: "गोगाजी का जन्म कहाँ हुआ था?", options: ["मालासेरी", "डडरेवा (चुरू)", "नांगलाझज (भरतपुर)", "झोरड़ा (नागौर)"], correctAnswer: 1 },
+                { question: "रामदेवजी के गुरु कौन थे?", options: ["बालीनाथ जी", "मल्लिनाथ जी", "लज्जाराम", "रुपनाथ जी"], correctAnswer: 0 },
+                { question: "पाबूजी के पिता का नाम क्या था?", options: ["धांधल जी", "गोगाजी", "मल्लिनाथ जी", "तेजाजी"], correctAnswer: 0 },
+                { question: "किस लोक देवता के भोपों की वंश वृद्धि नहीं होती?", options: ["गोगाजी", "मेहाजी मंगलिया", "पाबूजी", "तेजाजी"], correctAnswer: 1 },
+                { question: "इनमें से कौन मीठे मामा नहीं हैं?", options: ["मामा देव", "गोगाजी", "बालीनाथ जी", "झुंझार जी"], correctAnswer: 0 },
+                { question: "इनका सही मिलान करें:\n1. पाबूजी\n2. रामदेवजी\n3. गोगाजी\n4. तेजाजी", options: ["a. चैत्र अमावस्या", "b. नीली घोड़ी का सवार", "c. रुणेचा मंदिर", "d. सर्प काटने से मृत्यु", "सही जोड़ा: a-1, c-2, b-3, d-4", "सही जोड़ा: b-1, a-2, d-3, c-4", "सही जोड़ा: c-1, d-2, a-3, b-4", "सही जोड़ा: d-1, b-2, c-3, a-4"], correctAnswer: 0 },
+                { question: "इनका सही मिलान करें:\n1. हड़बूजी\n2. पाबूजी\n3. रामदेवजी\n4. मेहाजी मंगलिया", options: ["a. कोलूमण्ड (फलौदी)", "b. मंडोर जीत का आशीर्वाद", "c. उड़ूकाश्मीर (बाड़मेर)", "d. बापीनी (फलौदी)", "सही जोड़ा: b-1, a-2, c-3, d-4", "सही जोड़ा: a-1, b-2, d-3, c-4", "सही जोड़ा: c-1, d-2, a-3, b-4", "सही जोड़ा: d-1, c-2, b-3, a-4"], correctAnswer: 0 },
+                { question: "इनका सही मिलान करें:\n1. गोगाजी\n2. रामदेवजी\n3. तेजाजी\n4. पाबूजी", options: ["a. बालीनाथ जी", "b. जाहिर पीर", "c. लीलण घोड़ी", "d. केसर कालमी", "सही जोड़ा: b-1, a-2, c-3, d-4", "सही जोड़ा: a-1, b-2, d-3, c-4", "सही जोड़ा: c-1, d-2, a-3, b-4", "सही जोड़ा: d-1, c-2, b-3, a-4"], correctAnswer: 0 },
+                { question: "इनका सही मिलान करें:\n1. मेहाजी मंगलिया\n2. हड़बूजी\n3. तेजाजी\n4. गोगाजी", options: ["a. सियार वाहन", "b. भोपों की वंश वृद्धि नहीं", "c. खरनाल (नागौर)", "d. गोगामेड़ी (हनुमानगढ़)", "सही जोड़ा: b-1, a-2, c-3, d-4", "सही जोड़ा: a-1, b-2, d-3, c-4", "सही जोड़ा: c-1, d-2, a-3, b-4", "सही जोड़ा: d-1, c-2, b-3, a-4"], correctAnswer: 0 },
+                { question: "इनका सही मिलान करें:\n1. पाबूजी\n2. रामदेवजी\n3. गोगाजी\n4. तेजाजी", options: ["a. ऊँट रक्षक", "b. पीरों का पीर", "c. सर्प रक्षक", "d. काला-बाला का देवता", "सही जोड़ा: a-1, b-2, c-3, d-4", "सही जोड़ा: b-1, a-2, d-3, c-4", "सही जोड़ा: c-1, d-2, a-3, b-4", "सही जोड़ा: d-1, c-2, b-3, a-4"], correctAnswer: 0 },
+                { question: "इनका सही मिलान करें:\n1. हड़बूजी\n2. पाबूजी\n3. रामदेवजी\n4. तेजाजी", options: ["a. रावणहत्था", "b. बेंगटी गाँव", "c. नेजा झण्डा", "d. लीलण एक्सप्रेस", "सही जोड़ा: b-1, a-2, c-3, d-4", "सही जोड़ा: a-1, b-2, d-3, c-4", "सही जोड़ा: c-1, d-2, a-3, b-4", "सही जोड़ा: d-1, c-2, b-3, a-4"], correctAnswer: 0 },
+                { question: "इनका सही मिलान करें:\n1. गोगाजी\n2. रामदेवजी\n3. मेहाजी मंगलिया\n4. पाबूजी", options: ["a. चौबीस बाणियाँ", "b. ददरेवा (चुरू)", "c. कृष्ण जन्माष्टमी", "d. जींदराव खींची", "सही जोड़ा: b-1, a-2, c-3, d-4", "सही जोड़ा: a-1, b-2, d-3, c-4", "सही जोड़ा: c-1, d-2, a-3, b-4", "सही जोड़ा: d-1, c-2, b-3, a-4"], correctAnswer: 0 },
+                { question: "इनका सही मिलान करें:\n1. तेजाजी\n2. पाबूजी\n3. रामदेवजी\n4. गोगाजी", options: ["a. फूलमदे", "b. पेमलदे", "c. नेतलदे", "d. मेनलदे", "सही जोड़ा: b-1, a-2, c-3, d-4", "सही जोड़ा: a-1, b-2, d-3, c-4", "सही जोड़ा: c-1, d-2, a-3, b-4", "सही जोड़ा: d-1, c-2, b-3, a-4"], correctAnswer: 0 },
+                { question: "इनका सही मिलान करें:\n1. हड़बूजी\n2. मेहाजी मंगलिया\n3. तेजाजी\n4. रामदेवजी", options: ["a. भूंडेल (नागौर)", "b. किरड़ काव", "c. लीलण घोड़ी", "d. लीलो घोड़ा", "सही जोड़ा: a-1, b-2, c-3, d-4", "सही जोड़ा: b-1, a-2, d-3, c-4", "सही जोड़ा: c-1, d-2, a-3, b-4", "सही जोड़ा: d-1, c-2, b-3, a-4"], correctAnswer: 0 },
+                { question: "इनका सही मिलान करें:\n1. पाबूजी\n2. गोगाजी\n3. तेजाजी\n4. रामदेवजी", options: ["a. पाबू प्रकाश", "b. गोगाजी रा रसावला", "c. झुंझार तेजा", "d. कामड़िया सम्प्रदाय", "सही जोड़ा: a-1, b-2, c-3, d-4", "सही जोड़ा: b-1, a-2, d-3, c-4", "सही जोड़ा: c-1, d-2, a-3, b-4", "सही जोड़ा: d-1, c-2, b-3, a-4"], correctAnswer: 0 },
+                { question: "इनका सही मिलान करें:\n1. तेजाजी\n2. गोगाजी\n3. पाबूजी\n4. रामदेवजी", options: ["a. सर्प दंश से मृत्यु", "b. नीली घोड़ी", "c. ऊँटों का रक्षक", "d. रुणेचा", "सही जोड़ा: a-1, b-2, c-3, d-4", "सही जोड़ा: b-1, a-2, d-3, c-4", "सही जोड़ा: c-1, d-2, a-3, b-4", "सही जोड़ा: d-1, b-2, c-3, a-4"], correctAnswer: 0 },
+                { question: "इनका सही मिलान करें:\n1. गोगाजी\n2. तेजाजी\n3. रामदेवजी\n4. पाबूजी", options: ["a. हनुमानगढ़", "b. नागौर", "c. जैसलमेर", "d. फलौदी", "सही जोड़ा: a-1, b-2, c-3, d-4", "सही जोड़ा: b-1, a-2, d-3, c-4", "सही जोड़ा: c-1, d-2, a-3, b-4", "सही जोड़ा: d-1, c-2, b-3, a-4"], correctAnswer: 0 },
+                { question: "इनका सही मिलान करें:\n1. पाबूजी\n2. रामदेवजी\n3. गोगाजी\n4. तेजाजी", options: ["a. रावणहत्था", "b. तेरहवाली नृत्य", "c. खेजड़ी के नीचे मंदिर", "d. लीलण घोड़ी", "सही जोड़ा: a-1, b-2, c-3, d-4", "सही जोड़ा: b-1, a-2, d-3, c-4", "सही जोड़ा: c-1, d-2, a-3, b-4", "सही जोड़ा: d-1, c-2, b-3, a-4"], correctAnswer: 0 },
+                { question: "इनका सही मिलान करें:\n1. गोगाजी\n2. रामदेवजी\n3. तेजाजी\n4. पाबूजी", options: ["a. जाहिर पीर", "b. पीरों का पीर", "c. काला-बाला", "d. लक्ष्मण अवतार", "सही जोड़ा: a-1, b-2, c-3, d-4", "सही जोड़ा: b-1, a-2, d-3, c-4", "सही जोड़ा: c-1, d-2, a-3, b-4", "सही जोड़ा: d-1, c-2, b-3, a-4"], correctAnswer: 0 },
+                { question: "इनका सही मिलान करें:\n1. तेजाजी\n2. पाबूजी\n3. रामदेवजी\n4. गोगाजी", options: ["a. चैत्र अमावस्या", "b. भाद्रपद शुक्ल एकादशी", "c. सर्प रक्षक", "d. गोगामेड़ी", "सही जोड़ा: c-1, a-2, b-3, d-4", "सही जोड़ा: a-1, b-2, d-3, c-4", "सही जोड़ा: b-1, d-2, a-3, c-4", "सही जोड़ा: d-1, c-2, b-3, a-4"], correctAnswer: 0 },
+                { question: "\"झुंझार तेजा\" पुस्तक किसने लिखी?", options: ["लज्जाराम मेहता", "आशिया मोदजी", "जिंद्राव खीची", "बालीनाथ जी"], correctAnswer: 0 },
+                { question: "\"पाबूजी प्रकाश\" पुस्तक के लेखक कौन हैं?", options: ["लज्जाराम मेहता", "आशिया मोडजी", "जिंद्राव खीची", "बालीनाथ जी"], correctAnswer: 1 }
             ],
             currentQuestion: 0,
-            answers: new Array(10).fill(null),
-            timeLeft: 200,
+            answers: [],
+            timeLeft: 3600,
             studentName: "",
             studentRollNo: "",
-            startTime: null
+            startTime: null,
+            timerInterval: null
         };
+
+        examData.questions.forEach(() => examData.answers.push(null));
+
+        function shuffle(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        shuffle(examData.questions);
 
         function startExam() {
             const name = document.getElementById("name").value.trim();
             const rollNo = document.getElementById("rollNo").value.trim();
 
             if (!name || !rollNo) {
-                alert("Please enter both name and roll number");
+                alert("Please enter both your name and roll number");
                 return;
             }
 
@@ -445,11 +536,10 @@
                         Previous
                     </button>
                     <button onclick="nextQuestion()" class="nav-btn">
-                        ${examData.currentQuestion === examData.questions.length - 1 ? 'Finish' : 'Next'}
+                        ${examData.currentQuestion === examData.questions.length - 1 ? 'Submit' : 'Next'}
                     </button>
                 </div>
             `;
-
             updateProgress();
         }
 
@@ -490,14 +580,14 @@
 
         function startTimer() {
             const timerElement = document.getElementById("timer");
-            const timer = setInterval(() => {
+            examData.timerInterval = setInterval(() => {
                 examData.timeLeft--;
                 const minutes = Math.floor(examData.timeLeft / 60);
                 const seconds = examData.timeLeft % 60;
-                timerElement.textContent = `Time Left: ${minutes}:${seconds.toString().padStart(2, '0')}`;
+                timerElement.textContent = `Time Remaining: ${minutes}:${seconds.toString().padStart(2, '0')}`;
 
                 if (examData.timeLeft <= 0) {
-                    clearInterval(timer);
+                    clearInterval(examData.timerInterval);
                     submitExam();
                 }
             }, 1000);
@@ -536,7 +626,7 @@
             const timeTaken = Math.floor((new Date() - examData.startTime) / 1000);
             const accuracy = attempted ? ((score / attempted) * 100).toFixed(1) : 0;
 
-            return { score, accuracy, timeTaken };
+            return { score, accuracy, timeTaken, attempted };
         }
 
         function getIncorrectQuestions() {
@@ -554,26 +644,39 @@
         }
 
         function submitExam() {
+            clearInterval(examData.timerInterval);
             const results = calculateResults();
             const incorrectQuestions = getIncorrectQuestions();
 
             document.getElementById("examScreen").classList.add("hidden");
             document.getElementById("resultScreen").classList.remove("hidden");
 
-            document.getElementById("scoreValue").textContent = `${results.score}/${examData.questions.length}`;
-            document.getElementById("accuracyValue").textContent = `${results.accuracy}%`;
-            document.getElementById("timeValue").textContent = formatTime(results.timeTaken);
+            const resultDetails = document.getElementById("resultDetails");
+            resultDetails.innerHTML = `
+                <div class="result-item">
+                    <div class="result-item-value">${results.score}/${examData.questions.length}</div>
+                    <div class="result-item-label">Total Score</div>
+                </div>
+                <div class="result-item">
+                    <div class="result-item-value">${results.accuracy}%</div>
+                    <div class="result-item-label">Accuracy</div>
+                </div>
+                <div class="result-item">
+                    <div class="result-item-value">${formatTime(results.timeTaken)}</div>
+                    <div class="result-item-label">Time Taken</div>
+                </div>
+            `;
 
-            const resultCard = document.querySelector(".result-card");
             if (incorrectQuestions.length > 0) {
+                const resultCard = document.getElementById("resultCard");
                 resultCard.innerHTML += `
                     <div class="incorrect-questions">
                         <h3 class="text-lg font-bold mb-3">Incorrect Answers</h3>
                         ${incorrectQuestions.map(q => `
                             <div class="incorrect-question">
                                 <p><strong>${q.question}</strong></p>
-                                <p>Your answer: ${q.yourAnswer}</p>
-                                <p class="correct-answer">Correct: ${q.correctAnswer}</p>
+                                <p>Your Answer: ${q.yourAnswer}</p>
+                                <p class="correct-answer">Correct Answer: ${q.correctAnswer}</p>
                             </div>
                         `).join('')}
                     </div>
@@ -584,59 +687,105 @@
         function formatTime(seconds) {
             const minutes = Math.floor(seconds / 60);
             const remainingSeconds = seconds % 60;
-            return `${minutes}m ${remainingSeconds}s`;
+            return `${minutes}min ${remainingSeconds}sec`;
         }
 
         function downloadResult() {
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF();
             const results = calculateResults();
-            const incorrectQuestions = getIncorrectQuestions();
+            const currentDate = new Date().toLocaleDateString();
 
+            // Header
             doc.setFillColor(59, 130, 246);
             doc.rect(0, 0, 210, 40, 'F');
-
             doc.setTextColor(255);
-            doc.setFontSize(20);
-            doc.text("PMI Eduverse Results", 105, 25, { align: "center" });
+            doc.setFontSize(22);
+            doc.text("PMI EDUVERSE", 105, 15, { align: "center" });
+            doc.setFontSize(16);
+            doc.text("Examination Result Marksheet", 105, 30, { align: "center" });
 
+            // Logo (simplified representation using text and circle)
+            doc.setFillColor(255);
+            doc.circle(20, 20, 10, 'F');
+            doc.setTextColor(59, 130, 246);
+            doc.setFontSize(12);
+            doc.text("PMIEdu", 15, 22, { align: "center" });
+
+            // Student Details
             doc.setTextColor(0);
             doc.setFontSize(12);
-            doc.text(`Name: ${examData.studentName}`, 20, 50);
-            doc.text(`Roll No: ${examData.studentRollNo}`, 20, 60);
+            doc.text("Student Name: " + examData.studentName, 40, 50);
+            doc.text("Roll Number: " + examData.studentRollNo, 40, 60);
+            doc.text("Exam Date: " + currentDate, 40, 70);
+            doc.text("Time Taken: " + formatTime(results.timeTaken), 40, 80);
 
-            doc.setFillColor(249, 250, 251);
-            doc.rect(20, 70, 170, 40, 'F');
-            doc.text(`Score: ${results.score}/${examData.questions.length}`, 30, 85);
-            doc.text(`Accuracy: ${results.accuracy}%`, 30, 95);
-            doc.text(`Time: ${formatTime(results.timeTaken)}`, 30, 105);
+            // Results Section
+            doc.setFontSize(14);
+            doc.text("Examination Results", 20, 100);
+            doc.setLineWidth(0.5);
+            doc.line(20, 102, 190, 102);
 
-            let y = 130;
-            if (incorrectQuestions.length > 0) {
-                doc.setFontSize(14);
-                doc.text("Incorrect Answers", 20, y);
-                y += 10;
+            doc.setFontSize(12);
+            doc.text(`Total Questions: ${examData.questions.length}`, 20, 115);
+            doc.text(`Questions Attempted: ${results.attempted}`, 20, 125);
+            doc.text(`Correct Answers: ${results.score}`, 20, 135);
+            doc.text(`Accuracy: ${results.accuracy}%`, 20, 145);
+            doc.text(`Score: ${results.score}/${examData.questions.length}`, 20, 155);
 
-                incorrectQuestions.forEach((q, index) => {
-                    if (y > 260) {
-                        doc.addPage();
-                        y = 20;
-                    }
-                    doc.setFontSize(10);
-                    doc.text(`${index + 1}. ${q.question}`, 20, y, { maxWidth: 170 });
-                    y += doc.getTextDimensions(q.question, { maxWidth: 170 }).h + 5;
-                    doc.setTextColor(239, 68, 68);
-                    doc.text(`Your: ${q.yourAnswer}`, 25, y, { maxWidth: 165 });
-                    y += 10;
-                    doc.setTextColor(16, 185, 129);
-                    doc.text(`Correct: ${q.correctAnswer}`, 25, y, { maxWidth: 165 });
-                    doc.setTextColor(0);
-                    y += 15;
-                });
-            }
+            // Message
+            doc.setFontSize(10);
+            doc.setTextColor(100);
+            doc.text("Congratulations on completing the PMI Eduverse Examination! This marksheet", 20, 170, { maxWidth: 170 });
+            doc.text("certifies your performance and serves as an official record of your achievement.", 20, 178, { maxWidth: 170 });
+            doc.text("Keep up the excellent work!", 20, 186, { maxWidth: 170 });
 
-            doc.save("exam_results.pdf");
+            // Answer Key
+            doc.setTextColor(0);
+            doc.setFontSize(14);
+            doc.text("Correct Answer Key", 20, 205);
+            doc.line(20, 207, 190, 207);
+
+            let y = 220;
+            doc.setFontSize(10);
+            examData.questions.forEach((q, index) => {
+                if (y > 260) {
+                    doc.addPage();
+                    y = 20;
+                }
+                const answerLetter = String.fromCharCode(65 + q.correctAnswer); // Convert 0-3 to A-D
+                doc.text(`${index + 1}. ${answerLetter}`, 20, y);
+                y += 7;
+            });
+
+            // Footer
+            doc.setFillColor(59, 130, 246);
+            doc.rect(0, 280, 210, 17, 'F');
+            doc.setTextColor(255);
+            doc.setFontSize(10);
+            doc.text("PMI Eduverse - Official Marksheet", 20, 290);
+            doc.text("Contact:  www.pmieduverse.com", 105, 290, { align: "center" });
+
+            // Signature and Seal
+            doc.setTextColor(0);
+            doc.setFontSize(12);
+            doc.text("Authorized Signature: ____________________", 130, 265);
+            doc.setDrawColor(255, 0, 0);
+            doc.setLineWidth(1);
+            doc.circle(180, 245, 15); // Seal
+            doc.setFontSize(8);
+            doc.text("Official Seal", 175, 245, { align: "center" });
+            doc.setTextColor(255, 0, 0);
+            doc.text("PMIEDUVERSE", 180, 240, { align: "center" });
+            doc.text("Certified", 180, 250, { align: "center" });
+
+            doc.save(`${examData.studentRollNo}_Marksheet.pdf`);
         }
+
+        // Dark Mode Toggle
+        document.getElementById("darkModeToggle").addEventListener("click", () => {
+            document.body.classList.toggle("dark-mode");
+        });
     </script>
 </body>
 </html>
